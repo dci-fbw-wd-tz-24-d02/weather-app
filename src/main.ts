@@ -2,7 +2,7 @@ import "./style.css";
 
 const formEl = document.querySelector("form");
 const spanEl = document.querySelector("span");
-const API_KEY = "71ef9b2bf0064a20c46c5ee2f838b154";
+const API_KEY = "your key";
 
 function searchCityWeather(event: Event) {
   event.preventDefault();
