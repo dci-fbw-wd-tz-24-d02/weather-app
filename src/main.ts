@@ -8,6 +8,9 @@ function searchCityWeather(event: Event) {
   const sanititedCity = sanitizeCity(city);
   const isValidCity = isCityValid(sanititedCity);
   displayCityValidationStatus(isValidCity);
+  if(isValidCity){
+    getWeatherData(sanititedCity);
+  }
 }
 
 formEl?.addEventListener("submit", searchCityWeather);
@@ -69,22 +72,28 @@ function isCityValid(cityValueSanitized: string): boolean {
 }
 
 
-async function getWeatherData(){
-  const apiKey = "use your key"; 
-  const lat = "52.520008";
-  const lon = "13.404954";
-  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}`
+async function getWeatherData(city: string) {
+  const API_KEY = "71ef9b2bf0064a20c46c5ee2f838b154";
+  const geoResponse = await fetch(
+    `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
+  );
+  const geoData = await geoResponse.json();
+  console.log(":rocket: ~ getWeatherData ~ geoData:", geoData)
+  if (geoData.length === 0) {
+    console.error("City not found!!");
+    return;
+  }
+  const { lat, lon } = geoData[0];
+  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
   try {
     const response = await fetch(url);
-    console.log(":rocket: ~ getWeatherByCity ~ response:", response)
+    console.log(":rocket: ~ getWeatherByCity ~ response:", response);
     if (!response.ok) throw new Error("City not found");
     const data = await response.json();
-    console.log(data); 
+    console.log(data);
     return data;
   } catch (error: any) {
     console.error(error.message);
     return null;
   }
 }
-
-getWeatherData();
