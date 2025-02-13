@@ -71,6 +71,7 @@ function isCityValid(cityValueSanitized: string): boolean {
 }
 
 async function getCityWeatherData(city: string): Promise<void> {
+  console.log("🚀 ~ getCityWeatherData ~ city:", city);
   try {
     const cityCoords = await getCityLatandLon(city);
     if (!cityCoords) {
@@ -83,6 +84,8 @@ async function getCityWeatherData(city: string): Promise<void> {
     console.log(":rocket: ~ getWeatherByCity ~ response:", response);
     if (!response.ok) throw new Error("City not found");
     const data = await response.json();
+    // save data in localStorage
+    localStorage.setItem(city, JSON.stringify(data));
     console.log(data);
     return data;
   } catch (error: any) {
