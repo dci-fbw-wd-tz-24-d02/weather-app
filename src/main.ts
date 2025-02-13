@@ -1,15 +1,18 @@
 import "./style.css";
 
 const formEl = document.querySelector("form");
+const spanEl = document.querySelector("span");
 
 function searchCityWeather(event: Event) {
   event.preventDefault();
   const city = getCity(event);
   const sanititedCity = sanitizeCity(city);
   const isValidCity = isCityValid(sanititedCity);
-  displayCityValidationStatus(isValidCity);
-  if(isValidCity){
+  if (isValidCity) {
     getWeatherData(sanititedCity);
+    spanEl!.classList.add("hidden");
+  } else {
+    displayInvalidCityMessage(isValidCity);
   }
 }
 
@@ -20,17 +23,12 @@ formEl?.addEventListener("submit", searchCityWeather);
  *
  * @param isValidCity - A boolean indicating whether the city is valid (true) or invalid (false).
  */
-function displayCityValidationStatus(isValidCity: boolean) {
-  const spanEl = document.querySelector("span");
+function displayInvalidCityMessage(isValidCity: boolean) {
   if (!isValidCity) {
     spanEl!.textContent = "Invalid";
     spanEl!.classList.add("text-red-500");
-  } else {
-    spanEl!.textContent = "Valid";
-    spanEl!.classList.add("text-green-500");
+    spanEl!.classList.remove("hidden");
   }
-
-  spanEl!.classList.remove("hidden");
 }
 
 /**
@@ -71,14 +69,13 @@ function isCityValid(cityValueSanitized: string): boolean {
   return isCityValid;
 }
 
-
 async function getWeatherData(city: string) {
   const API_KEY = "71ef9b2bf0064a20c46c5ee2f838b154";
   const geoResponse = await fetch(
     `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
   );
   const geoData = await geoResponse.json();
-  console.log(":rocket: ~ getWeatherData ~ geoData:", geoData)
+  console.log(":rocket: ~ getWeatherData ~ geoData:", geoData);
   if (geoData.length === 0) {
     console.error("City not found!!");
     return;
