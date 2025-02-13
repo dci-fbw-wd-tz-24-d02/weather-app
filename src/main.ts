@@ -2,6 +2,7 @@ import "./style.css";
 
 const formEl = document.querySelector("form");
 const spanEl = document.querySelector("span");
+const API_KEY = "71ef9b2bf0064a20c46c5ee2f838b154";
 
 function searchCityWeather(event: Event) {
   event.preventDefault();
@@ -9,7 +10,7 @@ function searchCityWeather(event: Event) {
   const sanititedCity = sanitizeCity(city);
   const isValidCity = isCityValid(sanititedCity);
   if (isValidCity) {
-    getWeatherData(sanititedCity);
+    getCityWeatherData(sanititedCity);
     spanEl!.classList.add("hidden");
   } else {
     displayInvalidCityMessage(isValidCity);
@@ -69,21 +70,16 @@ function isCityValid(cityValueSanitized: string): boolean {
   return isCityValid;
 }
 
-async function getWeatherData(city: string) {
-  const API_KEY = "71ef9b2bf0064a20c46c5ee2f838b154";
-  const geoResponse = await fetch(
-    `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
-  );
-  const geoData = await geoResponse.json();
-  console.log(":rocket: ~ getWeatherData ~ geoData:", geoData);
-  if (geoData.length === 0) {
-    console.error("City not found!!");
-    return;
-  }
-  const { lat, lon } = geoData[0];
-  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`;
+async function getCityWeatherData(city: string): Promise<void> {
   try {
-    const response = await fetch(url);
+    const cityCoords = await getCityLatandLon(city);
+    if (!cityCoords) {
+      throw new Error("Coords not found!");
+    }
+    const { lat, lon } = cityCoords;
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+    );
     console.log(":rocket: ~ getWeatherByCity ~ response:", response);
     if (!response.ok) throw new Error("City not found");
     const data = await response.json();
@@ -91,6 +87,23 @@ async function getWeatherData(city: string) {
     return data;
   } catch (error: any) {
     console.error(error.message);
+  } finally {
+    console.log("Finally block");
+  }
+}
+
+async function getCityLatandLon(
+  city: string
+): Promise<{ lat: number; lon: number } | null> {
+  const geoResponse = await fetch(
+    `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
+  );
+  const geoData = await geoResponse.json();
+  console.log(":rocket: ~ getWeatherData ~ geoData:", geoData);
+  if (geoData.length === 0) {
+    console.error("City not found!!");
     return null;
   }
+  const { lat, lon } = geoData[0];
+  return { lat, lon };
 }
