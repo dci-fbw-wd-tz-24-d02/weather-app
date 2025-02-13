@@ -10,6 +10,12 @@ function searchCityWeather(event: Event) {
   const sanititedCity = sanitizeCity(city);
   const isValidCity = isCityValid(sanititedCity);
   if (isValidCity) {
+    // check if the city already exists in localStorage
+    const cityData = localStorage.getItem(sanititedCity);
+    if (cityData) {
+      console.log("Data exists in local storage");
+      return;
+    }
     getCityWeatherData(sanititedCity);
     spanEl!.classList.add("hidden");
   } else {
